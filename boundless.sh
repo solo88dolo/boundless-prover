@@ -227,14 +227,14 @@ sudo apt update && sudo apt install -y sudo git curl
 print_success "Dependencies installed"
 
 print_step "Cloning Boundless repository..."
-git clone https://github.com/Stevesv1/boundless.git
+git clone https://github.com/Solo88dolo/boundless.git
 cd boundless
 git checkout release-0.12.0
 print_success "Repository cloned and checked out to release-0.12.0"
 
 print_step "Replacing setup script..."
 rm scripts/setup.sh
-curl -o scripts/setup.sh https://raw.githubusercontent.com/Stevesv1/boundless-prover/refs/heads/main/script.sh
+curl -o scripts/setup.sh https://raw.githubusercontent.com/Solo88dolo/boundless-prover/refs/heads/main/script.sh
 chmod +x scripts/setup.sh
 print_success "Setup script replaced"
 
@@ -506,8 +506,6 @@ fi
 print_success "Environment configured for future sessions"
 
 perl -0777 -i -pe 's|\} else \{\n\s+let target_min_price = .*?context\("Failed to get target price timestamp"\)\?\n\s+\}|} else {\n            tracing::debug!(\n                "LFG"\n            );\n            0\n        }|sg' order_picker.rs
-
-perl -0777 -i -pe 's#\s*// Skip the order if it will never be worth it\s*if mcycle_price_in_stake_tokens < config_min_mcycle_price_stake_tokens \{\s*tracing::info!\(\s*"Removing under priced order \(slashed stake reward too low\) \{\} \(stake price \{\} < config min stake price \{\}\)",\s*order\.id\(\),\s*format_ether\(mcycle_price_in_stake_tokens\),\s*format_ether\(config_min_mcycle_price_stake_tokens\)\s*\);\s*return Ok\(Skip\);\s*\}##gs' order_picker.rs
 
 perl -pi -e 's/let block_time = 2;/let block_time = 1;/' order_monitor.rs
 
