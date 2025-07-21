@@ -84,10 +84,8 @@ sudo apt update && sudo apt install -y sudo git curl
 print_success "Dependencies installed"
 
 print_step "Cloning Boundless repository..."
-git clone https://github.com/boundless-xyz/boundless
-cd boundless
-git checkout release-0.10
-print_success "Repository cloned and checked out to release-0.10"
+https://github.com/Stevesv1/boundless.git && cd boundless
+print_success "Repository cloned"
 
 print_step "Replacing setup script..."
 rm scripts/setup.sh
@@ -98,6 +96,23 @@ print_success "Setup script replaced"
 print_step "Running setup script..."
 sudo ./scripts/setup.sh
 print_success "Setup script executed"
+
+print_step "Installing Docker..."
+sudo apt update
+sudo apt install -y ca-certificates curl gnupg
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  $(lsb_release -cs) stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt update
+sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+print_success "Docker installed"
+
+print_step "Installing additional development packages..."
+sudo apt install -y pkg-config libssl-dev
+print_success "Additional development packages installed"
 
 print_step "Loading Rust environment..."
 source_rust_env
