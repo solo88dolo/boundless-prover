@@ -84,7 +84,7 @@ sudo apt update && sudo apt install -y sudo git curl
 print_success "Dependencies installed"
 
 print_step "Cloning Boundless repository..."
-https://github.com/Stevesv1/boundless.git && cd boundless
+git clone https://github.com/Stevesv1/boundless.git && cd boundless
 print_success "Repository cloned"
 
 print_step "Replacing setup script..."
