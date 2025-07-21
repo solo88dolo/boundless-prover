@@ -95,6 +95,42 @@ curl -o scripts/setup.sh https://raw.githubusercontent.com/zunxbt/boundless-prov
 chmod +x scripts/setup.sh
 print_success "Setup script replaced"
 
+print_step "Downloading custom configuration files..."
+# Remove existing compose.yml and download the custom one
+if [[ -f "compose.yml" ]]; then
+    rm compose.yml
+    print_info "Removed existing compose.yml"
+fi
+
+# Download custom broker.toml
+curl -o broker.toml https://raw.githubusercontent.com/Stevesv1/boundless/refs/heads/main/broker.toml
+print_success "Downloaded custom broker.toml"
+
+# Download custom compose.yml
+curl -o compose.yml https://raw.githubusercontent.com/Stevesv1/boundless/refs/heads/main/compose.yml
+print_success "Downloaded custom compose.yml"
+
+print_step "Downloading custom Rust source files..."
+# Remove existing order_monitor.rs and download the custom one
+if [[ -f "crates/broker/src/order_monitor.rs" ]]; then
+    rm crates/broker/src/order_monitor.rs
+    print_info "Removed existing order_monitor.rs"
+fi
+
+# Remove existing order_picker.rs and download the custom one
+if [[ -f "crates/broker/src/order_picker.rs" ]]; then
+    rm crates/broker/src/order_picker.rs
+    print_info "Removed existing order_picker.rs"
+fi
+
+# Download custom order_monitor.rs
+curl -o crates/broker/src/order_monitor.rs https://raw.githubusercontent.com/Stevesv1/boundless/refs/heads/main/crates/broker/src/order_monitor.rs
+print_success "Downloaded custom order_monitor.rs"
+
+# Download custom order_picker.rs
+curl -o crates/broker/src/order_picker.rs https://raw.githubusercontent.com/Stevesv1/boundless/refs/heads/main/crates/broker/src/order_picker.rs
+print_success "Downloaded custom order_picker.rs"
+
 print_step "Running setup script..."
 sudo ./scripts/setup.sh
 print_success "Setup script executed"
