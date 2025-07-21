@@ -40,149 +40,6 @@ update_env_var() {
     fi
 }
 
-modify_compose_for_multiple_gpus() {
-    local gpu_count="$1"
-    
-    if [ $gpu_count -le 1 ]; then
-        print_info "Single GPU detected, no compose.yml modification needed"
-        return 0
-    fi
-    
-    print_step "Configuring compose.yml for $gpu_count GPUs..."
-    
-    cp compose.yml compose.yml.backup
-    print_info "Created backup: compose.yml.backup"
-    
-    print_info "Adding GPU agents for GPUs 1-$((gpu_count-1))..."
-    
-    local gpu_agent_end_line
-    gpu_agent_end_line=$(grep -n "capabilities: \[gpu\]" compose.yml | head -1 | cut -d: -f1)
-    
-    if [[ -z "$gpu_agent_end_line" ]]; then
-        print_error "Could not find gpu_prove_agent0 section end marker"
-        return 1
-    fi
-    
-    print_info "Found gpu_prove_agent0 end at line $gpu_agent_end_line"
-    
-    local additional_agents=""
-    for ((i=1; i<gpu_count; i++)); do
-        additional_agents+="
-  gpu_prove_agent$i:
-    <<: *agent-common
-    runtime: nvidia
-    mem_limit: 4G
-    cpus: 4
-    entrypoint: /app/agent -t prove
-
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              device_ids: ['$i']
-              capabilities: [gpu]
-"
-    done
-    
-    {
-        head -n "$gpu_agent_end_line" compose.yml
-        echo "$additional_agents"
-        tail -n +$((gpu_agent_end_line + 1)) compose.yml
-    } > compose.yml.tmp && mv compose.yml.tmp compose.yml
-    
-    print_success "Added GPU agents for GPUs 1-$((gpu_count-1))"
-    
-    print_info "Updating broker dependencies..."
-    
-    local broker_start_line
-    local depends_on_line
-    local depends_on_end_line
-    
-    broker_start_line=$(grep -n "^[[:space:]]*broker:" compose.yml | cut -d: -f1)
-    if [[ -z "$broker_start_line" ]]; then
-        print_error "Could not find broker section"
-        return 1
-    fi
-    
-    depends_on_line=$(tail -n +$broker_start_line compose.yml | grep -n "^[[:space:]]*depends_on:" | head -1 | cut -d: -f1)
-    if [[ -z "$depends_on_line" ]]; then
-        print_error "Could not find broker depends_on section"
-        return 1
-    fi
-    
-    depends_on_line=$((broker_start_line + depends_on_line - 1))
-    print_info "Found broker depends_on at line $depends_on_line"
-    
-    depends_on_end_line=$depends_on_line
-    while read -r line; do
-        ((depends_on_end_line++))
-        if [[ "$line" =~ ^[[:space:]]*-[[:space:]] ]]; then
-            continue
-        elif [[ -z "$line" ]] || [[ "$line" =~ ^[[:space:]]*# ]]; then
-            continue
-        elif [[ "$line" =~ ^[[:space:]]+[a-zA-Z_][a-zA-Z0-9_]*:[[:space:]]* ]]; then
-            ((depends_on_end_line--))
-            break
-        elif [[ "$line" =~ ^[a-zA-Z_][a-zA-Z0-9_]*:[[:space:]]* ]]; then
-            ((depends_on_end_line--))
-            break
-        fi
-    done < <(tail -n +$((depends_on_line + 1)) compose.yml)
-    
-    print_info "Dependencies section ends at line $depends_on_end_line"
-    
-    local new_dependencies="    depends_on:
-      - rest_api"
-    
-    for ((i=0; i<gpu_count; i++)); do
-        new_dependencies+="
-      - gpu_prove_agent$i"
-    done
-    
-    new_dependencies+="
-      - exec_agent0
-      - exec_agent1
-      - aux_agent
-      - snark_agent
-      - redis
-      - postgres"
-    
-    {
-        head -n $((depends_on_line - 1)) compose.yml
-        echo "$new_dependencies"
-        tail -n +$((depends_on_end_line + 1)) compose.yml
-    } > compose.yml.tmp && mv compose.yml.tmp compose.yml
-    
-    print_success "Updated broker dependencies to include all $gpu_count GPU agents"
-    
-    print_info "Verifying compose.yml modifications..."
-    local gpu_agents_count
-    gpu_agents_count=$(grep -c "gpu_prove_agent[0-9]*:" compose.yml || true)
-    
-    if [[ "$gpu_agents_count" -eq "$gpu_count" ]]; then
-        print_success "✓ Found $gpu_agents_count GPU agents in compose.yml"
-    else
-        print_warning "⚠ Expected $gpu_count GPU agents, found $gpu_agents_count"
-    fi
-    
-    local missing_deps=()
-    for ((i=0; i<gpu_count; i++)); do
-        if ! grep -A 20 "broker:" compose.yml | grep -q "gpu_prove_agent$i"; then
-            missing_deps+=("gpu_prove_agent$i")
-        fi
-    done
-    
-    if [[ ${#missing_deps[@]} -eq 0 ]]; then
-        print_success "✓ All GPU agents are included in broker dependencies"
-    else
-        print_warning "⚠ Missing GPU agents in broker dependencies: ${missing_deps[*]}"
-    fi
-    
-    print_success "Multi-GPU configuration completed successfully"
-    print_info "Configured for $gpu_count GPUs: gpu_prove_agent0 through gpu_prove_agent$((gpu_count-1))"
-}
-
 source_rust_env() {
     print_info "Sourcing Rust environment..."
     
@@ -320,15 +177,6 @@ else
     exit 1
 fi
 
-print_step "Checking GPU configuration..."
-gpu_count=0
-if command -v nvidia-smi &> /dev/null; then
-    gpu_count=$(nvidia-smi -L 2>/dev/null | wc -l)
-fi
-print_info "Found $gpu_count GPU(s)"
-
-modify_compose_for_multiple_gpus $gpu_count
-
 print_step "Network Selection"
 echo -e "${PURPLE}Choose networks to run the prover on:${NC}"
 echo "1. Base Mainnet"
@@ -401,28 +249,6 @@ if [[ $network_choice == *"3"* ]]; then
     
     print_success "Ethereum Sepolia environment configured"
 fi
-
-print_step "Configuring broker settings..."
-cp broker-template.toml broker.toml
-
-if [ $gpu_count -eq 1 ]; then
-    max_proofs=2
-    peak_khz=100
-elif [ $gpu_count -eq 2 ]; then
-    max_proofs=4
-    peak_khz=200
-elif [ $gpu_count -eq 3 ]; then
-    max_proofs=6
-    peak_khz=300
-else
-    max_proofs=$((gpu_count * 2))
-    peak_khz=$((gpu_count * 100))
-fi
-
-sed -i "s/max_concurrent_proofs = .*/max_concurrent_proofs = $max_proofs/" broker.toml
-sed -i "s/peak_prove_khz = .*/peak_prove_khz = $peak_khz/" broker.toml
-
-print_success "Broker settings configured for $gpu_count GPU(s)"
 
 print_step "Depositing stake for selected networks..."
 
