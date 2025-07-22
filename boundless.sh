@@ -110,26 +110,26 @@ print_success "Downloaded custom broker.toml"
 curl -o compose.yml https://raw.githubusercontent.com/Stevesv1/boundless/refs/heads/main/compose.yml
 print_success "Downloaded custom compose.yml"
 
-print_step "Downloading custom Rust source files..."
+# print_step "Downloading custom Rust source files..."
 # Remove existing order_monitor.rs and download the custom one
-if [[ -f "crates/broker/src/order_monitor.rs" ]]; then
-    rm crates/broker/src/order_monitor.rs
-    print_info "Removed existing order_monitor.rs"
-fi
+# if [[ -f "crates/broker/src/order_monitor.rs" ]]; then
+#    rm crates/broker/src/order_monitor.rs
+#    print_info "Removed existing order_monitor.rs"
+# fi
 
 # Remove existing order_picker.rs and download the custom one
-if [[ -f "crates/broker/src/order_picker.rs" ]]; then
-    rm crates/broker/src/order_picker.rs
-    print_info "Removed existing order_picker.rs"
-fi
+# if [[ -f "crates/broker/src/order_picker.rs" ]]; then
+#    rm crates/broker/src/order_picker.rs
+#    print_info "Removed existing order_picker.rs"
+# fi
 
 # Download custom order_monitor.rs
-curl -o crates/broker/src/order_monitor.rs https://raw.githubusercontent.com/Stevesv1/boundless/refs/heads/main/crates/broker/src/order_monitor.rs
-print_success "Downloaded custom order_monitor.rs"
+# curl -o crates/broker/src/order_monitor.rs https://raw.githubusercontent.com/Stevesv1/boundless/refs/heads/main/crates/broker/src/order_monitor.rs
+# print_success "Downloaded custom order_monitor.rs"
 
 # Download custom order_picker.rs
-curl -o crates/broker/src/order_picker.rs https://raw.githubusercontent.com/Stevesv1/boundless/refs/heads/main/crates/broker/src/order_picker.rs
-print_success "Downloaded custom order_picker.rs"
+# curl -o crates/broker/src/order_picker.rs https://raw.githubusercontent.com/Stevesv1/boundless/refs/heads/main/crates/broker/src/order_picker.rs
+# print_success "Downloaded custom order_picker.rs"
 
 print_step "Running setup script..."
 sudo ./scripts/setup.sh
