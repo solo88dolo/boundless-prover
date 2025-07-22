@@ -86,7 +86,7 @@ print_success "Dependencies installed"
 print_step "Cloning Boundless repository..."
 git clone https://github.com/boundless-xyz/boundless
 cd boundless
-git checkout release-0.12
+git checkout release-0.13
 print_success "Repository cloned"
 
 print_step "Replacing setup script..."
@@ -97,18 +97,18 @@ print_success "Setup script replaced"
 
 print_step "Downloading custom configuration files..."
 # Remove existing compose.yml and download the custom one
-if [[ -f "compose.yml" ]]; then
-    rm compose.yml
-    print_info "Removed existing compose.yml"
-fi
+# if [[ -f "compose.yml" ]]; then
+#     rm compose.yml
+#     print_info "Removed existing compose.yml"
+# fi
 
 # Download custom broker.toml
 curl -o broker.toml https://raw.githubusercontent.com/Stevesv1/boundless/refs/heads/main/broker.toml
 print_success "Downloaded custom broker.toml"
 
 # Download custom compose.yml
-curl -o compose.yml https://raw.githubusercontent.com/Stevesv1/boundless/refs/heads/main/compose.yml
-print_success "Downloaded custom compose.yml"
+# curl -o compose.yml https://raw.githubusercontent.com/Stevesv1/boundless/refs/heads/main/compose.yml
+# print_success "Downloaded custom compose.yml"
 
 # print_step "Downloading custom Rust source files..."
 # Remove existing order_monitor.rs and download the custom one
