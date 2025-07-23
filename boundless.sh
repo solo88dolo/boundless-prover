@@ -84,7 +84,7 @@ sudo apt update && sudo apt install -y sudo git curl
 print_success "Dependencies installed"
 
 print_step "Cloning Boundless repository..."
-git clone https://github.com/boundless-xyz/boundless
+git clone https://github.com/solo88dolo/boundless
 cd boundless
 git checkout release-0.13
 print_success "Repository cloned"
