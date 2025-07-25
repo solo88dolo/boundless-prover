@@ -95,7 +95,7 @@ curl -o scripts/setup.sh https://raw.githubusercontent.com/solo88dolo/boundless-
 chmod +x scripts/setup.sh
 print_success "Setup script replaced"
 
-print_step "Downloading custom configuration files..."
+# print_step "Downloading custom configuration files..."
 # Remove existing compose.yml and download the custom one
 # if [[ -f "compose.yml" ]]; then
 #   rm compose.yml
@@ -110,7 +110,7 @@ print_step "Downloading custom configuration files..."
 # curl -o compose.yml https://raw.githubusercontent.com/Solo88dolo/boundless/refs/heads/main/compose.yml
 # print_success "Downloaded custom compose.yml"
 
-print_step "Downloading custom Rust source files..."
+# print_step "Downloading custom Rust source files..."
 # Remove existing order_monitor.rs and download the custom one
 # if [[ -f "crates/broker/src/order_monitor.rs" ]]; then
 #    rm crates/broker/src/order_monitor.rs
