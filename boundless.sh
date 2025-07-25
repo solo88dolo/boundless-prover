@@ -84,9 +84,9 @@ sudo apt update && sudo apt install -y sudo git curl
 print_success "Dependencies installed"
 
 print_step "Cloning Boundless repository..."
-git clone https://github.com/boundless-xyz/boundless
+git clone https://github.com/dntjd1097/boundless
 cd boundless
-git checkout release-0.12
+git checkout release-0.13
 print_success "Repository cloned"
 
 print_step "Replacing setup script..."
@@ -107,7 +107,7 @@ curl -o broker.toml https://raw.githubusercontent.com/Solo88dolo/boundless/refs/
 print_success "Downloaded custom broker.toml"
 
 # Download custom compose.yml
-curl -o compose.yml https://raw.githubusercontent.com/Solo88dolo/boundless/refs/heads/main/compose.yml
+curl -o compose.yml https://raw.githubusercontent.com/dntjd1097/boundless/refs/heads/main/compose.yml
 print_success "Downloaded custom compose.yml"
 
 print_step "Downloading custom Rust source files..."
