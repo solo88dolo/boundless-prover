@@ -103,7 +103,7 @@ if [[ -f "compose.yml" ]]; then
 fi
 
 # Download custom broker.toml
-curl -o broker.toml https://raw.githubusercontent.com/Solo88dolo/boundless/refs/heads/main/broker.toml
+curl -o broker.toml https://raw.githubusercontent.com/dntjd1097/boundless/refs/heads/main/broker.toml
 print_success "Downloaded custom broker.toml"
 
 # Download custom compose.yml
